@@ -1,8 +1,29 @@
 # Papyr 📝
 
-A premium, minimalist implementation platform for cutting-edge ML research papers. Designed with a clean, typography-first aesthetic inspired by Acctual.com.
+A premium, minimalist implementation platform for cutting-edge ML research papers. Designed with a clean, typography-first aesthetic inspired by [Acctual.com](https://acctual.com).
 
 Papyr bridges the gap between reading a research paper and actually implementing it. By breaking down complex machine learning architectures into actionable, unit-testable micro-tasks, Papyr provides a hands-on, interactive learning environment.
+
+## 📸 Screenshots
+
+### Landing Page
+![Homepage](docs/screenshots/homepage.png)
+
+### Papers Dashboard & ArXiv Importer
+Paste any ArXiv link or paper name, and OpenAI will auto-generate coding tasks.
+![Papers](docs/screenshots/papers.png)
+
+### Implementation Track
+Each paper is broken down into micro-tasks with difficulty badges.
+![Paper Detail](docs/screenshots/paper_detail.png)
+
+### Interactive Code Workspace
+Split-pane Monaco editor with real-time Python execution and PyTest validation.
+![Workspace](docs/screenshots/workspace.png)
+
+### Agentic AI Tutor
+Stuck? Click the floating AI button for context-aware hints based on your current code.
+![AI Tutor](docs/screenshots/ai_tutor.png)
 
 ## ✨ Features
 
@@ -18,8 +39,8 @@ Papyr bridges the gap between reading a research paper and actually implementing
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Next.js (App Router), React 18, Tailwind CSS, Monaco Editor, Framer Motion
-- **Backend**: Python 3, FastAPI, SQLModel, PyTest, OpenAI API, ArXiv API
+- **Frontend**: Next.js 16 (App Router), React 18, Tailwind CSS, Monaco Editor, Framer Motion
+- **Backend**: Python 3, FastAPI, SQLModel, PyTorch, NumPy, PyTest, OpenAI API, ArXiv API
 - **Infrastructure**: Docker, Docker Compose, SQLite
 
 ## 🚀 Quick Start (Docker)
@@ -28,7 +49,7 @@ The absolute easiest way to run the entire Papyr stack is via Docker Compose.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/papyr.git
+git clone https://github.com/insaneamogh/papyr.git
 cd papyr
 
 # Set up your environment variables
@@ -39,7 +60,7 @@ cp backend/.env.example backend/.env
 docker compose up -d --build
 ```
 
-The frontend will be available at `http://localhost:3000` and the backend strictly at `http://localhost:8000`.
+The frontend will be available at `http://localhost:3000` and the backend at `http://localhost:8000`.
 
 ## 💻 Local Development
 
@@ -57,7 +78,6 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Start the FastAPI server
-export DATABASE_URL="sqlite:///./papyr.db"
 uvicorn main:app --reload --port 8000
 ```
 
@@ -78,4 +98,8 @@ The platform comes pre-seeded with legendary architectural papers ready for impl
 - *ImageNet Classification with Deep Convolutional Neural Networks* (AlexNet)
 - *Efficient Estimation of Word Representations in Vector Space* (word2vec)
 - *Auto-Encoding Variational Bayes* (VAE)
-...and supports dynamic ingestion of any active ArXiv preprint using the Python pipeline.
+- ...and supports dynamic ingestion of any active ArXiv preprint via the frontend UI or CLI.
+
+## 📄 License
+
+MIT
