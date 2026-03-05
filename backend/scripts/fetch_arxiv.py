@@ -2,9 +2,11 @@ import os
 import sys
 import argparse
 import urllib.request
+import urllib.parse
 import xml.etree.ElementTree as ET
 from openai import OpenAI
 import json
+import re
 
 # Add backend to sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -38,8 +40,23 @@ Make sure the pytest `test_code` uses the functions defined in the `boilerplate_
 """
 
 def fetch_arxiv_papers(query: str, max_results: int = 1):
-    """Fetch papers from ArXiv API."""
-    url = f"http://export.arxiv.org/api/query?search_query=all:{urllib.parse.quote(query)}&start=0&max_results={max_results}"
+    """Fetch papers from ArXiv API. Supports both search queries and ArXiv URLs/IDs."""
+    
+    # Check if the query is an ArXiv URL or ID
+    arxiv_id = None
+    # Match URLs like https://arxiv.org/abs/1706.03762 or arxiv.org/abs/1706.03762v3
+    url_match = re.search(r'arxiv\.org/(?:abs|pdf)/([\d.]+(?:v\d+)?)', query)
+    if url_match:
+        arxiv_id = url_match.group(1)
+    # Match bare ArXiv IDs like 1706.03762 or 2005.14165
+    elif re.match(r'^\d{4}\.\d{4,5}(v\d+)?$', query.strip()):
+        arxiv_id = query.strip()
+    
+    if arxiv_id:
+        url = f"http://export.arxiv.org/api/query?id_list={arxiv_id}"
+    else:
+        url = f"http://export.arxiv.org/api/query?search_query=all:{urllib.parse.quote(query)}&start=0&max_results={max_results}"
+    
     print(f"Fetching from ArXiv: {url}")
     
     with urllib.request.urlopen(url) as response:
@@ -88,7 +105,7 @@ def generate_tasks_with_llm(client: OpenAI, title: str, summary: str):
         raw_content = raw_content[3:-3]
         
     try:
-        tasks = json.loads(raw_content)
+        tasks = json.loads(raw_content, strict=False)
         return tasks
     except json.JSONDecodeError as e:
         print(f"Failed to parse LLM response. Raw output:\n{raw_content}")
@@ -112,7 +129,7 @@ def main():
     create_db_and_tables()
 
     # 1. Fetch
-    import urllib.parse
+    import urllib.parse as _up  # already imported at top level for script
     papers = fetch_arxiv_papers(args.query, max_results=1)
     if not papers:
         print("No papers found on ArXiv for this query.")

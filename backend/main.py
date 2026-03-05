@@ -1,4 +1,8 @@
 """Papyr FastAPI Backend."""
+import os
+from dotenv import load_dotenv
+load_dotenv()  # Load .env file automatically
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import papers, code
