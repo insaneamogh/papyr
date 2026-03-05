@@ -8,12 +8,13 @@ Papyr bridges the gap between reading a research paper and actually implementing
 
 - **Interactive Split-Pane Workspace**: A bespoke Monaco editor environment configured for seamless Python development.
 - **Automated ArXiv Ingestion Pipeline**: 
-  - The script `backend/scripts/fetch_arxiv.py` connects directly to the ArXiv API to download the latest XML metadata for high-impact machine learning papers.
-  - Using the unstructured text, it interfaces with the **OpenAI API** (gpt-4o) via constrained structured outputs to mathematically synthesize 3-5 tiered implementation micro-tasks (Initialization, Forward Pass, etc).
-  - It intrinsically generates PyTest validation functions corresponding to the boilerplate it created, saving everything to the SQLite DB.
+  - Paste any ArXiv link or paper name directly into the frontend UI and click "Ingest Paper".
+  - The backend connects to the ArXiv API for metadata, then uses **OpenAI GPT-4o-mini** to synthesize 3-5 tiered implementation micro-tasks.
+  - Intrinsically generates PyTest validation functions, saving everything to the SQLite DB.
+- **Agentic AI Tutor**: A context-aware coding assistant embedded directly in the workspace. When stuck, click the floating "Ask AI" button — the tutor reads your current code, compares it to the hidden solution, and provides targeted hints without spoiling the answer.
 - **Real-time PyTest Validation**: Secure, sandboxed subprocess evaluation of user code against hidden unit tests.
 - **Resume-Ready UI/UX**: A highly-polished, pure-white minimalist design system heavily utilizing modern typography and Framer Motion micro-interactions.
-- **Robust SQL backend**: Fast API powered by a lightweight, persistent SQLite database using SQLModel and SQLAlchemy.
+- **Robust SQL backend**: FastAPI powered by a lightweight, persistent SQLite database using SQLModel and SQLAlchemy.
 
 ## 🛠️ Tech Stack
 

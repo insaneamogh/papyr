@@ -5,10 +5,12 @@ import time
 import tempfile
 import os
 from fastapi import APIRouter, HTTPException, Depends
-from models.schemas import CodeRunRequest, CodeRunResponse, CodeSubmitRequest, TestResult
+from models.schemas import CodeRunRequest, CodeRunResponse, CodeSubmitRequest, TestResult, HelpRequest, HelpResponse
 from models.database import get_session
 from models.schemas import Paper, Task
 from sqlmodel import Session, select
+import openai
+import os
 
 router = APIRouter(prefix="/api/code", tags=["code"])
 
@@ -116,3 +118,44 @@ async def submit_code(request: CodeSubmitRequest, session: Session = Depends(get
                 output=str(e),
                 success=False,
             )
+
+@router.post("/help", response_model=HelpResponse)
+async def ask_ai_tutor(request: HelpRequest, session: Session = Depends(get_session)):
+    """Provide an AI hint for a specific coding task."""
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="OPENAI_API_KEY not configured on server.")
+
+    query_paper = select(Paper).where(Paper.slug == request.paper_slug)
+    paper = session.exec(query_paper).first()
+    if not paper:
+        raise HTTPException(status_code=404, detail="Paper not found")
+
+    task = next((t for t in paper.tasks if t.task_identifier == request.task_id), None)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    client = openai.OpenAI(api_key=api_key)
+
+    system_prompt = (
+        "You are an expert ML Engineer and tutor helping a student implement a research paper. "
+        "The student is stuck on a specific task and needs a hint. "
+        "Review their code, compare it to the correct solution, and answer their question. "
+        "CRITICAL: Do not just give them the exact code. Provide conceptual hints, point out syntax errors, or gently guide them to the right mathematical formula."
+    )
+
+    prompt = f"Task Description: {task.description}\n\nCorrect Solution Reference:\n```python\n{task.solution_code}\n```\n\nStudent's Current Code:\n```python\n{request.code}\n```\n\nStudent's Question:\n\"{request.question}\"\n\nPlease provide a helpful hint."
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.4
+        )
+        hint = response.choices[0].message.content.strip()
+        return HelpResponse(hint=hint)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI Tutor error: {str(e)}")

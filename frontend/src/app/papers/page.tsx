@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import PaperCard from "@/components/PaperCard";
-import { fetchPapers } from "@/lib/api";
+import { fetchPapers, importPaper } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 const TAGS = ["All", "CNN", "CV", "Embeddings", "Fine-tuning", "GAN", "Low-Rank", "NLP", "Parameter Efficiency", "Pre-training", "Representation Learning", "RNN", "Transformer", "VAE"];
 
@@ -12,6 +13,29 @@ export default function PapersPage() {
     const [search, setSearch] = useState("");
     const [activeTag, setActiveTag] = useState("All");
     const [loading, setLoading] = useState(true);
+
+    // Import State
+    const [importQuery, setImportQuery] = useState("");
+    const [isImporting, setIsImporting] = useState(false);
+    const [importMessage, setImportMessage] = useState("");
+    const router = useRouter();
+
+    const handleImport = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!importQuery.trim()) return;
+
+        setIsImporting(true);
+        setImportMessage("Gathering ArXiv data and prompting OpenAI... this may take 15 seconds.");
+        try {
+            const res = await importPaper(importQuery);
+            setImportMessage(`Success! Redirecting to ${res.paper_title}...`);
+            router.push(`/papers/${res.slug}`);
+        } catch (error: any) {
+            setImportMessage("Failed to import. Make sure it's a valid ML paper title or ArXiv ID.");
+            console.error(error);
+            setIsImporting(false);
+        }
+    };
 
     useEffect(() => {
         async function load() {
@@ -38,7 +62,35 @@ export default function PapersPage() {
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
                 <h1 className="text-5xl sm:text-7xl font-bold tracking-tighter mb-4 text-black">Papers</h1>
-                <p className="text-xl text-gray-500 mb-12 font-medium">Select a paper to start implementing.</p>
+                <p className="text-xl text-gray-500 mb-12 font-medium">Select a paper to start implementing, or import a brand new one.</p>
+
+                {/* ArXiv Importer */}
+                <div className="bg-[#f9fafb] border border-gray-200 p-6 sm:p-8 rounded-[2rem] shadow-sm mb-12 max-w-3xl">
+                    <h2 className="text-2xl font-black text-black mb-3">Auto-Ingest via ArXiv</h2>
+                    <p className="text-gray-500 mb-6 font-medium">Paste an ArXiv link or paper name. OpenAI will synthesize coding micro-tasks automatically.</p>
+                    <form onSubmit={handleImport} className="flex flex-col sm:flex-row gap-4">
+                        <input
+                            type="text"
+                            placeholder="e.g. https://arxiv.org/abs/1706.03762 or 'Transformer'"
+                            className="flex-1 px-4 py-3 sm:py-4 border border-gray-200 rounded-2xl bg-white shadow-sm text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all font-medium"
+                            value={importQuery}
+                            onChange={(e) => setImportQuery(e.target.value)}
+                            disabled={isImporting}
+                        />
+                        <button
+                            type="submit"
+                            disabled={isImporting || !importQuery.trim()}
+                            className="bg-black text-white px-8 py-3 sm:py-4 rounded-xl font-bold disabled:opacity-50 hover:bg-gray-800 transition-all whitespace-nowrap shadow-sm"
+                        >
+                            {isImporting ? "Importing..." : "Ingest Paper"}
+                        </button>
+                    </form>
+                    {importMessage && (
+                        <p className={`mt-4 text-sm font-semibold ${importMessage.includes("Success") ? "text-green-600" : "text-black animate-pulse"}`}>
+                            {importMessage}
+                        </p>
+                    )}
+                </div>
 
                 {/* Search Bar */}
                 <div className="relative mb-10 max-w-2xl">

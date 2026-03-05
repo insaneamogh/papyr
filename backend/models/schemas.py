@@ -68,3 +68,23 @@ class CodeSubmitRequest(SQLModel):
     paper_slug: str
     task_id: str
     timeout: int = 10
+
+class ImportRequest(SQLModel):
+    query: str
+    tags: str = "AI, ML"
+
+class ImportResponse(SQLModel):
+    success: bool
+    slug: str
+    paper_title: str
+    task_count: int
+    message: str = ""
+
+class HelpRequest(SQLModel):
+    code: str
+    question: str
+    paper_slug: str
+    task_id: str
+
+class HelpResponse(SQLModel):
+    hint: str

@@ -3,7 +3,10 @@ from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import Optional, List
 from sqlmodel import Session, select
 from models.database import get_session
-from models.schemas import Paper, Task, PaperRead, PaperReadWithTasks
+from models.schemas import Paper, Task, PaperRead, PaperReadWithTasks, ImportRequest, ImportResponse
+import openai
+import os
+from scripts.fetch_arxiv import fetch_arxiv_papers, generate_tasks_with_llm
 
 router = APIRouter(prefix="/api/papers", tags=["papers"])
 
@@ -108,3 +111,71 @@ async def get_task(slug: str, task_id: str, session: Session = Depends(get_sessi
         "paper_title": paper.title,
         "paper_slug": paper.slug,
     }
+
+@router.post("/import", response_model=ImportResponse)
+async def import_arxiv_paper(request: ImportRequest, session: Session = Depends(get_session)):
+    """Fetch an ArXiv paper, generate tasks, and save to DB."""
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="OPENAI_API_KEY not configured on server.")
+
+    # Fetch paper metadata
+    papers = fetch_arxiv_papers(request.query, max_results=1)
+    if not papers:
+        raise HTTPException(status_code=404, detail="No papers found on ArXiv for this query/URL.")
+        
+    paper_data = papers[0]
+    
+    # Check if already present
+    existing = session.exec(select(Paper).where(Paper.slug == paper_data["slug"])).first()
+    if existing:
+        return ImportResponse(
+            success=True, 
+            slug=existing.slug, 
+            paper_title=existing.title, 
+            task_count=len(existing.tasks),
+            message="Paper already exists."
+        )
+
+    # Generate Tasks
+    client = openai.OpenAI(api_key=api_key)
+    try:
+        tasks_data = generate_tasks_with_llm(client, paper_data["title"], paper_data["summary"])
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate tasks using AI: {str(e)}")
+        
+    # Save to SQLite
+    paper = Paper(
+        slug=paper_data["slug"],
+        title=paper_data["title"][:200],
+        year=2024,
+        authors=paper_data["authors"][:200],
+        tags=request.tags,
+        description=paper_data["summary"],
+        original_url=paper_data["url"]
+    )
+    
+    for t_data in tasks_data:
+        task = Task(
+            task_identifier=t_data.get("id", "t1"),
+            title=t_data.get("title", "Task"),
+            description=t_data.get("description", ""),
+            difficulty=t_data.get("difficulty", "Medium"),
+            type=t_data.get("type", "Micro"),
+            boilerplate_code=t_data.get("boilerplate_code", ""),
+            test_code=t_data.get("test_code", ""),
+            solution_code=t_data.get("solution_code", ""),
+            time_limit=t_data.get("time_limit", 5)
+        )
+        paper.tasks.append(task)
+        
+    session.add(paper)
+    session.commit()
+    
+    return ImportResponse(
+        success=True,
+        slug=paper.slug,
+        paper_title=paper.title,
+        task_count=len(tasks_data),
+        message="Successfully ingested paper and generated tasks!"
+    )
