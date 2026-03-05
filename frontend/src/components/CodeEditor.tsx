@@ -15,32 +15,32 @@ export default function CodeEditor({ value, onChange, language = "python", readO
 
     useEffect(() => {
         if (monaco) {
-            monaco.editor.defineTheme('papyr-dark', {
-                base: 'vs-dark',
+            monaco.editor.defineTheme('papyr-light', {
+                base: 'vs',
                 inherit: true,
                 rules: [
-                    { token: 'comment', foreground: '6b7280', fontStyle: 'italic' },
-                    { token: 'keyword', foreground: '3b82f6' },
-                    { token: 'string', foreground: '10b981' },
-                    { token: 'number', foreground: 'f59e0b' },
-                    { token: 'type', foreground: '8b5cf6' },
+                    { token: 'comment', foreground: '9ca3af', fontStyle: 'italic' },
+                    { token: 'keyword', foreground: '005cc5', fontStyle: 'bold' },
+                    { token: 'string', foreground: '032f62' },
+                    { token: 'number', foreground: '005cc5' },
+                    { token: 'type', foreground: 'd73a49' },
                 ],
                 colors: {
-                    'editor.background': '#000000',
-                    'editor.lineHighlightBackground': '#111111',
-                    'editorLineNumber.foreground': '#4b5563',
-                    'editorIndentGuide.background': '#1f2937',
+                    'editor.background': '#ffffff',
+                    'editor.lineHighlightBackground': '#f3f4f6',
+                    'editorLineNumber.foreground': '#9ca3af',
+                    'editorIndentGuide.background': '#e5e7eb',
                 }
             });
         }
     }, [monaco]);
 
     return (
-        <div className="w-full h-full border-l border-gray-800 bg-black">
+        <div className="w-full h-full border-l border-gray-200 bg-white">
             <Editor
                 height="100%"
                 language={language}
-                theme="papyr-dark"
+                theme="papyr-light"
                 value={value}
                 onChange={onChange}
                 options={{
@@ -58,7 +58,7 @@ export default function CodeEditor({ value, onChange, language = "python", readO
                     wordWrap: "on"
                 }}
                 loading={
-                    <div className="flex h-full items-center justify-center text-gray-500 font-mono text-sm">
+                    <div className="flex h-full items-center justify-center text-gray-400 font-semibold text-sm">
                         Loading editor...
                     </div>
                 }

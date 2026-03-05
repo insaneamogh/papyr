@@ -4,12 +4,13 @@ import sys
 import time
 import tempfile
 import os
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from models.schemas import CodeRunRequest, CodeRunResponse, CodeSubmitRequest, TestResult
-from data.seed_papers import PAPERS
+from models.database import get_session
+from models.schemas import Paper, Task
+from sqlmodel import Session, select
 
 router = APIRouter(prefix="/api/code", tags=["code"])
-
 
 @router.post("/run", response_model=CodeRunResponse)
 async def run_code(request: CodeRunRequest):
@@ -52,14 +53,15 @@ async def run_code(request: CodeRunRequest):
 
 
 @router.post("/submit", response_model=TestResult)
-async def submit_code(request: CodeSubmitRequest):
+async def submit_code(request: CodeSubmitRequest, session: Session = Depends(get_session)):
     """Run code against unit tests and return results."""
-    # Find the paper and task
-    paper = next((p for p in PAPERS if p["slug"] == request.paper_slug), None)
+    # Find the paper and task from DB
+    query_paper = select(Paper).where(Paper.slug == request.paper_slug)
+    paper = session.exec(query_paper).first()
     if not paper:
         raise HTTPException(status_code=404, detail="Paper not found")
 
-    task = next((t for t in paper.get("tasks", []) if t["id"] == request.task_id), None)
+    task = next((t for t in paper.tasks if t.task_identifier == request.task_id), None)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
@@ -71,7 +73,7 @@ async def submit_code(request: CodeSubmitRequest):
 
         # Write test file
         test_file = os.path.join(tmpdir, "test_submission.py")
-        test_code = f"import submission\n\n{task['test_code']}"
+        test_code = f"import submission\n\n{task.test_code}"
         with open(test_file, "w") as f:
             f.write(test_code)
 

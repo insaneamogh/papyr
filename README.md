@@ -1,71 +1,77 @@
-# Papyr - Research Paper Implementation Platform
+# Papyr 📝
 
-> Don't just read the paper. Compile it.
+A premium, minimalist implementation platform for cutting-edge ML research papers. Designed with a clean, typography-first aesthetic inspired by Acctual.com.
 
-Papyr is a platform inspired by PaperCode.in that bridges the gap between machine learning theory and practical reality. It allows users to read research papers, breaks them down into actionable micro-tasks, and provides an in-browser code editor with unit testing to implement state-of-the-art models from scratch.
+Papyr bridges the gap between reading a research paper and actually implementing it. By breaking down complex machine learning architectures into actionable, unit-testable micro-tasks, Papyr provides a hands-on, interactive learning environment.
 
-## Project Structure
+## ✨ Features
 
-This project consists of two main parts:
+- **Interactive Split-Pane Workspace**: A bespoke Monaco editor environment configured for seamless Python development.
+- **Automated ArXiv Ingestion**: Fetches the latest ML papers via the ArXiv API and utilizes OpenAI's LLMs to dynamically synthesize coding tasks and PyTest cases.
+- **Real-time PyTest Validation**: Secure, sandboxed subprocess evaluation of user code against hidden unit tests.
+- **Resume-Ready UI/UX**: A highly-polished, pure-white glassmorphic design system heavily utilizing modern typography and Framer Motion micro-interactions.
+- **Robust SQL backend**: Fast API powered by a lightweight, persistent SQLite database using SQLModel and SQLAlchemy.
 
-1. **Frontend (`/frontend`)**: A modern Next.js 14 web application using the App Router, styled with Tailwind CSS, and containing an interactive Monaco-based code editor.
-2. **Backend (`/backend`)**: A FastAPI Python server handling the paper catalog, micro-tasks, and a sandboxed environment to execute and test user code against PyTest unit tests.
+## 🛠️ Tech Stack
 
-## Tech Stack
+- **Frontend**: Next.js (App Router), React 18, Tailwind CSS, Monaco Editor, Framer Motion
+- **Backend**: Python 3, FastAPI, SQLModel, PyTest, OpenAI API, ArXiv API
+- **Infrastructure**: Docker, Docker Compose, SQLite
 
-- **Frontend**: Next.js (React), Tailwind CSS, Framer Motion, Monaco Editor (`@monaco-editor/react`)
-- **Backend**: FastAPI, Pydantic, Uvicorn, subprocess code execution, Pytest, NumPy
+## 🚀 Quick Start (Docker)
 
-## Getting Started
+The absolute easiest way to run the entire Papyr stack is via Docker Compose.
 
-To run this project locally, you will need to start both the frontend and backend development servers.
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/papyr.git
+cd papyr
 
-### 1. Start the Backend (FastAPI)
+# Set up your environment variables
+cp backend/.env.example backend/.env
+# Add your OPENAI_API_KEY to backend/.env
 
-Requires Python 3.9+ or higher (tested with 3.14).
+# Build and start the containers
+docker compose up -d --build
+```
 
+The frontend will be available at `http://localhost:3000` and the backend strictly at `http://localhost:8000`.
+
+## 💻 Local Development
+
+If you prefer to run the applications natively without Docker:
+
+### Backend
 ```bash
 cd backend
+
+# Create and activate a virtual environment (macOS/Linux)
 python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt pytest
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start the FastAPI server
+export DATABASE_URL="sqlite:///./papyr.db"
 uvicorn main:app --reload --port 8000
 ```
-*(Alternatively, you can just run `bash start.sh` inside the `backend/` folder)*
 
-The API will be available at `http://localhost:8000/api/papers`.
-
-### 2. Start the Frontend (Next.js)
-
-Requires Node.js 18+ and `npm`.
-
+### Frontend
 ```bash
 cd frontend
+
+# Install Node.js dependencies
 npm install
+
+# Start the Next.js development server
 npm run dev
 ```
 
-The frontend will be available at `http://localhost:3000`.
-
-## Features
-
-- **Micro-Tasks**: Complex papers are broken down into small, digestible steps (e.g., Implementing Positional Encoding for the Transformer paper).
-- **In-Browser Editor**: Write Python and NumPy code directly in the browser via a rich, dark-themed Monaco editor.
-- **Unit Tests**: Code is verified rigorously against hidden test cases using pytest on the backend to guarantee correctness.
-- **Dynamic Tagging & Search**: Easily filter papers by topic (NLP, CV, Transformer, GAN, etc.).
-
-## Seed Data
-
-The backend currently ships with 10 legendary ML papers, heavily populated with boilerplate codes and PyTest suites including:
-- Attention Is All You Need (Transformer)
-- LoRA: Low-Rank Adaptation of Large Language Models
-- ImageNet Classification (AlexNet)
-- Auto-Encoding Variational Bayes (VAE)
-- Generative Adversarial Networks (GAN)
-- Word2Vec
-- BERT
-- ResNet
-- Batch Normalization
-- Recurrent Neural Networks
-
-Enjoy compiling the research!
+## 🧠 Supported Papers (Seed Data)
+The platform comes pre-seeded with legendary architectural papers ready for implementation:
+- *Attention Is All You Need* (Transformers)
+- *LoRA: Low-Rank Adaptation of Large Language Models*
+- *ImageNet Classification with Deep Convolutional Neural Networks* (AlexNet)
+- *Efficient Estimation of Word Representations in Vector Space* (word2vec)
+...and supports dynamic ingestion of any active ArXiv preprint.
