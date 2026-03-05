@@ -7,9 +7,12 @@ Papyr bridges the gap between reading a research paper and actually implementing
 ## ✨ Features
 
 - **Interactive Split-Pane Workspace**: A bespoke Monaco editor environment configured for seamless Python development.
-- **Automated ArXiv Ingestion**: Fetches the latest ML papers via the ArXiv API and utilizes OpenAI's LLMs to dynamically synthesize coding tasks and PyTest cases.
+- **Automated ArXiv Ingestion Pipeline**: 
+  - The script `backend/scripts/fetch_arxiv.py` connects directly to the ArXiv API to download the latest XML metadata for high-impact machine learning papers.
+  - Using the unstructured text, it interfaces with the **OpenAI API** (gpt-4o) via constrained structured outputs to mathematically synthesize 3-5 tiered implementation micro-tasks (Initialization, Forward Pass, etc).
+  - It intrinsically generates PyTest validation functions corresponding to the boilerplate it created, saving everything to the SQLite DB.
 - **Real-time PyTest Validation**: Secure, sandboxed subprocess evaluation of user code against hidden unit tests.
-- **Resume-Ready UI/UX**: A highly-polished, pure-white glassmorphic design system heavily utilizing modern typography and Framer Motion micro-interactions.
+- **Resume-Ready UI/UX**: A highly-polished, pure-white minimalist design system heavily utilizing modern typography and Framer Motion micro-interactions.
 - **Robust SQL backend**: Fast API powered by a lightweight, persistent SQLite database using SQLModel and SQLAlchemy.
 
 ## 🛠️ Tech Stack
@@ -70,8 +73,8 @@ npm run dev
 
 ## 🧠 Supported Papers (Seed Data)
 The platform comes pre-seeded with legendary architectural papers ready for implementation:
-- *Attention Is All You Need* (Transformers)
 - *LoRA: Low-Rank Adaptation of Large Language Models*
 - *ImageNet Classification with Deep Convolutional Neural Networks* (AlexNet)
 - *Efficient Estimation of Word Representations in Vector Space* (word2vec)
-...and supports dynamic ingestion of any active ArXiv preprint.
+- *Auto-Encoding Variational Bayes* (VAE)
+...and supports dynamic ingestion of any active ArXiv preprint using the Python pipeline.

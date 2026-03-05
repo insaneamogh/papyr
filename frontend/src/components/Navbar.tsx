@@ -14,12 +14,6 @@ export default function Navbar() {
                             <Link href="/papers" className="text-gray-500 hover:text-black text-sm font-semibold transition-colors">
                                 Papers
                             </Link>
-                            <Link href="/roadmap" className="text-gray-500 hover:text-black text-sm font-semibold transition-colors">
-                                Roadmap
-                            </Link>
-                            <Link href="/about" className="text-gray-500 hover:text-black text-sm font-semibold transition-colors">
-                                About
-                            </Link>
                         </div>
                     </div>
                 </div>
